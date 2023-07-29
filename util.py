@@ -122,7 +122,9 @@ def load_pickle(pickle_file):
     return pickle_data
 
 def load_adj(pkl_filename, adjtype):
-    sensor_ids, sensor_id_to_ind, adj_mx = load_pickle(pkl_filename)
+    # sensor_ids, sensor_id_to_ind, adj_mx = load_pickle(pkl_filename)
+
+    adj_mx = np.load(pkl_filename)[1,:,:]
     if adjtype == "scalap":
         adj = [calculate_scaled_laplacian(adj_mx)]
     elif adjtype == "normlap":
@@ -138,7 +140,7 @@ def load_adj(pkl_filename, adjtype):
     else:
         error = 0
         assert error, "adj type not defined"
-    return sensor_ids, sensor_id_to_ind, adj
+    return adj
 
 
 def load_dataset(dataset_dir, batch_size, valid_batch_size= None, test_batch_size=None):

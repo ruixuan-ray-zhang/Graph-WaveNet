@@ -8,25 +8,25 @@ from engine import trainer
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--device',type=str,default='cuda:0',help='')
-parser.add_argument('--data',type=str,default='data/METR-LA',help='data path')
-parser.add_argument('--adjdata',type=str,default='data/sensor_graph/adj_mx.pkl',help='adj data path')
+parser.add_argument('--data',type=str,default='data/NJ_WIM',help='data path')
+parser.add_argument('--adjdata',type=str,default='data/sensor_graph/similarity_matrix.npy',help='adj data path')
 parser.add_argument('--adjtype',type=str,default='doubletransition',help='adj type')
 parser.add_argument('--gcn_bool',action='store_true',help='whether to add graph convolution layer')
 parser.add_argument('--aptonly',action='store_true',help='whether only adaptive adj')
 parser.add_argument('--addaptadj',action='store_true',help='whether add adaptive adj')
 parser.add_argument('--randomadj',action='store_true',help='whether random initialize adaptive adj')
-parser.add_argument('--seq_length',type=int,default=12,help='')
+parser.add_argument('--seq_length',type=int,default=30,help='')
 parser.add_argument('--nhid',type=int,default=32,help='')
 parser.add_argument('--in_dim',type=int,default=2,help='inputs dimension')
-parser.add_argument('--num_nodes',type=int,default=207,help='number of nodes')
-parser.add_argument('--batch_size',type=int,default=64,help='batch size')
+parser.add_argument('--num_nodes',type=int,default=8,help='number of nodes')
+parser.add_argument('--batch_size',type=int,default=24,help='batch size')
 parser.add_argument('--learning_rate',type=float,default=0.001,help='learning rate')
 parser.add_argument('--dropout',type=float,default=0.3,help='dropout rate')
 parser.add_argument('--weight_decay',type=float,default=0.0001,help='weight decay rate')
 parser.add_argument('--epochs',type=int,default=100,help='')
 parser.add_argument('--print_every',type=int,default=50,help='')
 #parser.add_argument('--seed',type=int,default=99,help='random seed')
-parser.add_argument('--save',type=str,default='./garage/metr',help='save path')
+parser.add_argument('--save',type=str,default='./garage/wim',help='save path')
 parser.add_argument('--expid',type=int,default=1,help='experiment id')
 
 args = parser.parse_args()
@@ -40,11 +40,10 @@ def main():
     #np.random.seed(args.seed)
     #load data
     device = torch.device(args.device)
-    sensor_ids, sensor_id_to_ind, adj_mx = util.load_adj(args.adjdata,args.adjtype)
-    print(adj_mx[0])
-    print(adj_mx[0].shape)
-    print(adj_mx[1])
-    print(len(adj_mx))
+    adj_mx = util.load_adj(args.adjdata,args.adjtype)
+    # print(adj_mx[0].shape)
+    # print(adj_mx[1])
+    # print(len(adj_mx))
     dataloader = util.load_dataset(args.data, args.batch_size, args.batch_size, args.batch_size)
     scaler = dataloader['scaler']
     supports = [torch.tensor(i).to(device) for i in adj_mx]
@@ -158,7 +157,7 @@ def main():
     amae = []
     amape = []
     armse = []
-    for i in range(12):
+    for i in range(30):
         pred = scaler.inverse_transform(yhat[:,:,i])
         real = realy[:,:,i]
         metrics = util.metric(pred,real)
